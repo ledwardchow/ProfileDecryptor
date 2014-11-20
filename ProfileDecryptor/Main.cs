@@ -24,25 +24,32 @@ namespace WindowsFormsApplication1
         {
             try
             {
-                string filename = txtFileName.Text;                
-                string encryptedStuff = txtEncrypted.Text;                
+                string filename = txtFileName.Text;
+                string encryptedStuff = txtEncrypted.Text;
                 Byte[] datatodecrypt = Convert.FromBase64String(encryptedStuff);
                 EnvelopedCms envelopedCms = new EnvelopedCms();
                 envelopedCms.Decode(datatodecrypt);
                 Console.WriteLine(envelopedCms.ContentInfo.Content.Length);
                 envelopedCms.Decrypt(envelopedCms.RecipientInfos[0]);
-                txtEncrypted.Text = Convert.ToString(envelopedCms.ContentInfo.Content);
-                System.IO.File.WriteAllBytes(txtFileName.Text + "decrypted.txt", envelopedCms.ContentInfo.Content);
-                MessageBox.Show("Decrypted! Contents written to " + txtFileName.Text + "decrypted.txt");
+                Convert.ToString(envelopedCms.ContentInfo.Content);
+
+                string filepart = "Decrypted_" + DateTime.Now.ToString() + ".txt";
+                filepart = filepart.Replace("/", "_");
+                filepart = filepart.Replace(" ", "_");
+                filepart = filepart.Replace(":", "_");
+                filename = txtFileName.Text + filepart;
+
+                System.IO.File.WriteAllBytes(filename, envelopedCms.ContentInfo.Content);
+                MessageBox.Show("Decrypted! Contents written to : " + filename);
             }
             catch (CryptographicException ex)
-            {               
-                MessageBox.Show(ex.Message);                       
+            {
+                MessageBox.Show(ex.Message);
             }
             catch (FormatException ex)
             {
                 MessageBox.Show(ex.Message);
-            }          
+            }
         }
 
         private void btnGo_Click(object sender, EventArgs e)
@@ -54,6 +61,24 @@ namespace WindowsFormsApplication1
         private void button1_Click(object sender, EventArgs e)
         {
             txtEncrypted.Text = "";
+        }
+
+        private void frmMain_Load(object sender, EventArgs e)
+        {
+            txtFileName.Text = Environment.ExpandEnvironmentVariables("%USERPROFILE%") + "\\Desktop\\ProfileDec_";
+
+            fldBrosweDialog.RootFolder = Environment.SpecialFolder.Desktop;
+        }
+
+        private void btnBrowse_Click(object sender, EventArgs e)
+        {
+            fldBrosweDialog.ShowDialog();
+            txtFileName.Text = fldBrosweDialog.SelectedPath + "\\ProfileDec_";
+        }
+
+        private void fldBrosweDialog_HelpRequest(object sender, EventArgs e)
+        {
+
         }
 
 
